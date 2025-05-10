@@ -1,0 +1,31 @@
+{
+  "1 - 1": [
+    {
+      "tipo": "1",
+      "diametro": "1",
+      "comprimento": "1",
+      "possuiVT": "nao",
+      "valorVT": null,
+      "ordem": "1",
+      "operacao": "1"
+    },
+    {
+      "tipo": "1",
+      "diametro": "1",
+      "comprimento": "1",
+      "possuiVT": "nao",
+      "valorVT": null,
+      "ordem": "1",
+      "operacao": "1"
+    },
+    {
+      "tipo": "1",
+      "diametro": "1",
+      "comprimento": "1",
+      "possuiVT": "nao",
+      "valorVT": null,
+      "ordem": "1",
+      "operacao": "1"
+    }
+  ]
+}

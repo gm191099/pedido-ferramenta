@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Requisição de Ferramentas</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background-color: #f0f0f0;
+        color: #333;
+      }
+      h1 {
+        text-align: center;
+        color: #2f3b4c;
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-top: 10px;
+        font-weight: bold;
+        color: #2f3b4c;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        font-size: 1rem;
+      }
+      .ferramenta {
+        margin-bottom: 20px;
+        padding: 20px;
+        background: #fff;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease-in-out;
+      }
+      .ferramenta:hover {
+        transform: scale(1.02);
+        border-color: #4a6ea9;
+      }
+      .campoVT {
+        display: none;
+      }
+      .campoVT input {
+        margin-top: 5px;
+      }
+      button {
+        background-color: #2f8f93;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin-top: 20px;
+        display: block;
+        width: 100%;
+      }
+      button:hover {
+        background-color: #218b85;
+      }
+      .container-pedido {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #fff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Requisição de Ferramentas</h1>
+
+    <div class="container-pedido">
+      <form id="formularioPedido">
+        <label for="maquina">Máquina:</label>
+        <select id="maquina" name="maquina" required>
+          <option value="">Selecione</option>
+          <option value="Máquina 1">Máquina 1</option>
+          <option value="Máquina 2">Máquina 2</option>
+          <!-- Adicione até Máquina 26 -->
+        </select>
+
+        <label for="drt">DRT:</label>
+        <input type="text" id="drt" name="drt" required />
+
+        <label for="ordem">Ordem:</label>
+        <input type="text" id="ordem" name="ordem" required />
+
+        <label for="operacao">Operação:</label>
+        <input type="text" id="operacao" name="operacao" required />
+
+        <label for="quantidade">Número de ferramentas:</label>
+        <input
+          type="number"
+          id="quantidade"
+          name="quantidade"
+          min="1"
+          required
+        />
+
+        <div id="ferramentasContainer"></div>
+
+        <button type="submit">Enviar Pedido</button>
+      </form>
+    </div>
+
+    <script>
+      const quantidadeInput = document.getElementById("quantidade");
+      const container = document.getElementById("ferramentasContainer");
+
+      quantidadeInput.addEventListener("input", () => {
+        const quantidade = parseInt(quantidadeInput.value);
+        container.innerHTML = "";
+
+        for (let i = 0; i < quantidade; i++) {
+          const div = document.createElement("div");
+          div.className = "ferramenta";
+
+          div.innerHTML = `<h3>Ferramenta ${i + 1}</h3>
+            <label>Tipo:</label>
+            <input name="tipo" required>
+
+            <label>Diâmetro:</label>
+            <input name="diametro" required>
+
+            <label>Comprimento (mm):</label>
+            <input name="comprimento" required>
+
+            <label>Possui VT:</label>
+            <select name="possuiVT" onchange="exibirCampoVT(this)">
+              <option value="nao">Não</option>
+              <option value="sim">Sim</option>
+            </select>
+
+            <div class="campoVT">
+              <label>Valor do VT:</label>
+              <input name="valorVT" />
+            </div>`;
+
+          container.appendChild(div);
+        }
+      });
+
+      function exibirCampoVT(select) {
+        const campoVT = select.parentElement.querySelector(".campoVT");
+        campoVT.style.display = select.value === "sim" ? "block" : "none";
+      }
+
+      document
+        .getElementById("formularioPedido")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const maquina = document.getElementById("maquina").value;
+          const drt = document.getElementById("drt").value;
+          const ordem = document.getElementById("ordem").value;
+          const operacao = document.getElementById("operacao").value;
+
+          const ferramentas = Array.from(
+            document.querySelectorAll(".ferramenta")
+          ).map((div) => {
+            return {
+              tipo: div.querySelector("input[name='tipo']").value,
+              diametro: div.querySelector("input[name='diametro']").value,
+              comprimento: div.querySelector("input[name='comprimento']").value,
+              possuiVT: div.querySelector("select[name='possuiVT']").value,
+              valorVT: div.querySelector("input[name='valorVT']").value || null,
+            };
+          });
+
+          const pedido = {
+            maquina,
+            drt,
+            ordem,
+            operacao,
+            ferramentas,
+            horario: new Date().toISOString(),
+            status: "Aberto",
+          };
+
+          try {
+            const response = await fetch("http://192.168.0.10:3000/painel", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(pedido),
+            });
+
+            if (response.ok) {
+              alert("Pedido enviado com sucesso!");
+              this.reset();
+              container.innerHTML = "";
+            } else {
+              alert("Erro ao enviar pedido.");
+            }
+          } catch (error) {
+            alert("Erro ao enviar pedido: " + error);
+          }
+        });
+    </script>
+  </body>
+</html>
